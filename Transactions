@@ -244,5 +244,55 @@ will be prevented from being updated or deleted by any other transaction.
 It also prevents new rows from being inserted by other transactions,
 so this isolation level prevents both non-repeatable read and phantom read problems.
 
+---Difference between serializable and snapshot isolation levels
+Serializable isolation is implemented by acquiring locks which means the resources are locked for the duration of the current transaction. 
+This isolation level does not have any concurrency side effects but at the cost of significant reduction in concurrency.
+
+Snapshot isolation doesn't acquire locks, it maintains versioning in Tempdb.
+Since, snapshot isolation does not lock resources,
+it can significantly increase the number of concurrent transactions while providing the same level of data consistency as serializable isolation does.
+
+--Transaction 1
+Set transaction isolation level serializable
+Begin Transaction
+Update tblInventory set Stock = 5 where Id = 1
+waitfor delay '00:00:10'
+Commit Transaction
+
+-- Transaction 2
+Set transaction isolation level serializable
+Select Stock from tblInventory where Id = 1
+
+
+-- Transaction 2
+-- Enable snapshot isloation for the database
+Alter database SampleDB SET ALLOW_SNAPSHOT_ISOLATION ON
+-- Set the transaction isolation level to snapshot
+Set transaction isolation level snapshot
+
+Select ItemsInStock from tblInventory where Id = 1
+
+---but same is not possible when we try to update/delete/insert on same data 
+
+--Transaction 1
+Set transaction isolation level serializable
+Begin Transaction
+Update tblInventory set ItemsInStock = 5 where Id = 1
+waitfor delay '00:00:10'
+Commit Transaction
+
+
+-- Transaction 2
+-- Enable snapshot isloation for the database
+Alter database SampleDB SET ALLOW_SNAPSHOT_ISOLATION ON
+-- Set the transaction isolation level to snapshot
+Set transaction isolation level snapshot
+
+Update tblInventory set ItemsInStock = 8 where Id = 1
+
+it will give error 
+while executing 2nd transaction
+
+
 
 
