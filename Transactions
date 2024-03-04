@@ -270,14 +270,14 @@ Alter database SampleDB SET ALLOW_SNAPSHOT_ISOLATION ON
 -- Set the transaction isolation level to snapshot
 Set transaction isolation level snapshot
 
-Select ItemsInStock from tblInventory where Id = 1
+Select Stock from tblInventory where Id = 1
 
 ---but same is not possible when we try to update/delete/insert on same data 
 
 --Transaction 1
 Set transaction isolation level serializable
 Begin Transaction
-Update tblInventory set ItemsInStock = 5 where Id = 1
+Update tblInventory set Stock = 5 where Id = 1
 waitfor delay '00:00:10'
 Commit Transaction
 
@@ -288,7 +288,7 @@ Alter database SampleDB SET ALLOW_SNAPSHOT_ISOLATION ON
 -- Set the transaction isolation level to snapshot
 Set transaction isolation level snapshot
 
-Update tblInventory set ItemsInStock = 8 where Id = 1
+Update tblInventory set Stock = 8 where Id = 1
 
 it will give error 
 while executing 2nd transaction
